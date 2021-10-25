@@ -34,6 +34,8 @@
 
 #include <libvirt/libvirt.h>
 #include <libvirt/virterror.h>
+#include <libvirt/libvirt-qemu.h>
+
 #ifndef ENABLE_KVM_LEGACY
 # include <libkvmi.h>
 # include "libkvmi_wrapper.h"
@@ -88,6 +90,10 @@ kvm_put_memory(vmi_instance_t vmi,
                addr_t paddr,
                uint32_t length,
                void *buf);
+
+char *exec_qmp_cmd(
+    kvm_instance_t *kvm,
+    char *query);
 
 // shared by kvm.c and kvm_events.c
 # ifndef ENABLE_KVM_LEGACY

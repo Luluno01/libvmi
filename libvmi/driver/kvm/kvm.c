@@ -411,21 +411,6 @@ init_kvmi(
         return false;
     }
 
-    // query and display supported features
-    bool spp, vmfunc, eptp, ve;
-    kvm->libkvmi.kvmi_spp_support(kvm->kvmi_dom, &spp);
-    kvm->libkvmi.kvmi_vmfunc_support(kvm->kvmi_dom, &vmfunc);
-    kvm->libkvmi.kvmi_eptp_support(kvm->kvmi_dom, &eptp);
-    kvm->libkvmi.kvmi_ve_support(kvm->kvmi_dom, &ve);
-
-    dbprint(VMI_DEBUG_KVM, "--KVMi features:\n");
-    // available in 2013 on Intel Haswell
-    dbprint(VMI_DEBUG_KVM, "--    VMFUNC: %s\n", vmfunc ? "Yes" : "No");
-    dbprint(VMI_DEBUG_KVM, "--    EPTP: %s\n", eptp ? "Yes" : "No");
-    dbprint(VMI_DEBUG_KVM, "--    VE: %s\n", ve ? "Yes" : "No");
-    // available in 2019 on Intel Ice Lake
-    dbprint(VMI_DEBUG_KVM, "--    SPP: %s\n", spp ? "Yes" : "No");
-
     return true;
 }
 
@@ -606,28 +591,6 @@ kvm_destroy(
         dlclose(kvm->libvirt.handle_qemu);
         g_free(kvm);
     }
-}
-
-status_t
-kvm_get_memsize(
-    vmi_instance_t vmi,
-    uint64_t *allocated_ram_size,
-    addr_t *maximum_physical_address)
-{
-#ifdef ENABLE_SAFETY_CHECKS
-    if (!allocated_ram_size || !maximum_physical_address)
-        return VMI_FAILURE;
-#endif
-    kvm_instance_t *kvm = kvm_get_instance(vmi);
-    unsigned long long max_gfn;
-    if (kvm->libkvmi.kvmi_get_maximum_gfn(kvm->kvmi_dom, &max_gfn)) {
-        errprint("--failed to get maximum gfn\n");
-        return VMI_FAILURE;
-    }
-
-    *allocated_ram_size = max_gfn * vmi->page_size;
-    *maximum_physical_address = max_gfn << vmi->page_shift;
-    return VMI_SUCCESS;
 }
 
 status_t kvm_request_page_fault (
